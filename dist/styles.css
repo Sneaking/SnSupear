@@ -1,0 +1,113 @@
+/* Editor Container Styles */
+#editor-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #1a1a1a;
+}
+
+h1 {
+  color: #00ff00;
+  margin-bottom: 1rem;
+}
+
+/* Toolbar Styles */
+#toolbar {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+#toolbar button, #toolbar select {
+  background-color: #333;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#toolbar button:hover {
+  background-color: #444;
+}
+
+/* Editor Wrapper Styles */
+#editor-wrapper {
+  flex: 1;
+  min-height: 500px;
+  border: 1px solid #00ff00;
+  border-radius: 4px;
+}
+
+/* CodeMirror Custom Theme */
+.CodeMirror {
+  height: 100% !important;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 16px;
+  background-color: #0a0a0a !important;
+  color: #00ff00 !important;
+}
+
+/* Marina Theme Syntax Colors */
+.cm-s-marina.CodeMirror {
+  background-color: #0a0a0a;
+  color: #00ff00;
+}
+
+.cm-s-marina .cm-keyword {
+  color: #00ffff;
+  font-weight: bold;
+}
+
+.cm-s-marina .cm-string {
+  color: #ff9900;
+}
+
+.cm-s-marina .cm-number {
+  color: #ff00ff;
+}
+
+.cm-s-marina .cm-def {
+  color: #00ff00;
+}
+
+.cm-s-marina .cm-variable {
+  color: #00ff00;
+}
+
+.cm-s-marina .cm-variable-2 {
+  color: #00ccff;
+}
+
+.cm-s-marina .cm-comment {
+  color: #666;
+  font-style: italic;
+}
+
+.cm-s-marina .cm-operator {
+  color: #ff00ff;
+}
+
+.cm-s-marina .cm-builtin {
+  color: #ff00ff;
+}
+
+.CodeMirror-cursor {
+  border-left: 2px solid #00ff00 !important;
+}
+
+.CodeMirror-selected {
+  background: #333333 !important;
+}
+
+.CodeMirror-gutters {
+  background-color: #0a0a0a !important;
+  border-right: 1px solid #00ff00 !important;
+}
+
+.CodeMirror-linenumber {
+  color: #00ff00 !important;
+}
