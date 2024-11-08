@@ -1,120 +1,134 @@
-#include "SyntaxHighlighter.h"
-#include "AIAssistant.h"
-#include "VirtualizedRender.h"
-#include "ErrorHandler.h"
-#include <string>
-#include <vector>
-#include <algorithm>
+// EditorUI.cpp
+#include "EditorUI.h"
+#include <QPalette>
+#include <QJsonObject>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QDebug>
+#include "ConfigManager.h"
+#include <QScrollBar>
+#include <QCompleter>
+#include <QShortcut>
+#include <QTimer>
+#include <QStringListModel>
 
-class EditorUI {
-private:
-    HWND hEdit;
-    SyntaxHighlighter syntaxHighlighter;
-    AIAssistant aiAssistant;
-    VirtualizedRender virtualizedRender;
-    std::vector<CHARRANGE> selections;
+EditorUI::EditorUI(QWidget* parent) : QWidget(parent),
+    editor(new QPlainTextEdit(this)),
+    aiAssistant(new AIAssistant(this)),
+    syntaxHighlighter(new SyntaxHighlighter(editor->document())),
+    codeFormatter(new CodeFormatter(this)),
+    chatDock(new QDockWidget("AI Chat", this)),
+    completer(new QCompleter(this)),
+    debounceTimer(new QTimer(this))
+{
+    setupUI();
+    setupConnections();
+    setupShortcuts();
 
-    void handleMultipleSelections(WPARAM wParam, LPARAM lParam);
-    void showGotoAnything();
+    // Apply a default theme on startup
+    applyTheme("Sn_MarinaSync_Dark"); 
 
-public:
-    EditorUI(HWND hEdit, const std::string& apiKey)
-        : hEdit(hEdit), aiAssistant(apiKey), virtualizedRender(hEdit) {}
-
-    LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-};
-
-LRESULT CALLBACK EditorUI::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_CREATE:
-            // Initialize RichEdit control
-            LoadLibrary(TEXT("Msftedit.dll"));
-            hEdit = CreateWindowEx(
-                0, L"RICHEDIT50W", L"",
-                WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-                0, 0, width, height,
-                hwnd, (HMENU)IDC_MAIN_EDIT, hInstance, NULL
-            );
-            
-            // Set Marina theme colors
-            {
-                CHARFORMAT2 cf = {0};
-                cf.cbSize = sizeof(CHARFORMAT2);
-                cf.dwMask = CFM_COLOR | CFM_BACKCOLOR;
-                cf.crTextColor = RGB(144, 0, 0);  // Dark red for default text
-                cf.crBackColor = RGB(1, 0, 0);    // Very dark green background
-                SendMessage(hEdit, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&cf);
-
-                // Set caret color
-                SendMessage(hEdit, EM_SETCARETCOLOR, FALSE, RGB(0, 255, 0));  // Green caret
-            }
-            break;
-
-        case WM_COMMAND:
-            if (HIWORD(wParam) == EN_CHANGE && (HWND)lParam == hEdit) {
-                int textLength = GetWindowTextLength(hEdit);
-                std::wstring text(textLength + 1, L'\0');
-                GetWindowText(hEdit, &text[0], textLength + 1);
-                syntaxHighlighter.applyHighlighting(hEdit, text);
-            }
-            break;
-
-        case WM_KEYDOWN:
-            if (wParam == VK_CONTROL) {
-                // Start multiple selection mode
-                handleMultipleSelections(wParam, lParam);
-            } else if (wParam == 'P' && GetKeyState(VK_CONTROL) < 0) {
-                // Ctrl+P for Goto Anything
-                showGotoAnything();
-            }
-            break;
-
-        // ... (rest of the WndProc function)
-    }
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    // Initialize AI Assistant with API key from ConfigManager
+    QString apiKey = ConfigManager::getInstance().getAPIKey();
+    aiAssistant->setApiKey(apiKey);
 }
 
-void EditorUI::handleMultipleSelections(WPARAM wParam, LPARAM lParam) {
-    if (wParam == VK_CONTROL) {
-        CHARRANGE cr;
-        SendMessage(hEdit, EM_EXGETSEL, 0, (LPARAM)&cr);
-        
-        // Add new selection if it doesn't overlap with existing ones
-        if (std::none_of(selections.begin(), selections.end(), 
-            [&cr](const CHARRANGE& existing) {
-                return (cr.cpMin >= existing.cpMin && cr.cpMin <= existing.cpMax) ||
-                       (cr.cpMax >= existing.cpMin && cr.cpMax <= existing.cpMax);
-            })) {
-            selections.push_back(cr);
-        }
+void EditorUI::setupUI() {
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(editor);
+
+    // Set up the chat dock widget
+    chatDock->setAllowedAreas(Qt::BottomDockWidgetArea); 
+    chatDock->setWidget(aiAssistant);  
+    addDockWidget(Qt::BottomDockWidgetArea, chatDock); 
+
+    setLayout(layout);
+
+    // Set up QCompleter
+    completer->setWidget(editor);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+}
+
+void EditorUI::setupConnections() {
+    connect(aiAssistant, &AIAssistant::responseReceived, this, &EditorUI::onAIResponseReceived);
+    connect(editor, &QPlainTextEdit::textChanged, this, [this]() {
+        syntaxHighlighter->rehighlight();
+        onTextChanged(); // Trigger code completion
+    });
+    connect(this, &EditorUI::customContextMenuRequested, this, &EditorUI::onFormatCode);
+    connect(completer, QOverload<const QString &>::of(&QCompleter::activated),
+            this, &EditorUI::insertCompletion);
+}
+
+void EditorUI::setupShortcuts() {
+    // Add shortcuts for code completion (e.g., Ctrl+Space) and formatting (e.g., Ctrl+I)
+    QShortcut *completionShortcut = new QShortcut(QKeySequence("Ctrl+Space"), this);
+    connect(completionShortcut, &QShortcut::activated, this, &EditorUI::requestCompletion);
+
+    QShortcut *formatShortcut = new QShortcut(QKeySequence("Ctrl+I"), this);
+    connect(formatShortcut, &QShortcut::activated, this, &EditorUI::onFormatCode);
+}
+
+void EditorUI::applyTheme(const QString& themeName) {
+    QJsonObject theme = ConfigManager::getInstance().getTheme(themeName);
+    if (!theme.isEmpty()) {
+        QPalette palette = editor->palette();
+        palette.setColor(QPalette::Base, QColor(theme["background"].toString()));
+        palette.setColor(QPalette::Text, QColor(theme["foreground"].toString()));
+        editor->setPalette(palette);
+
+        syntaxHighlighter->setHighlightingRules(theme); 
+    } else {
+        qWarning() << "Theme not found:" << themeName;
     }
 }
 
-void EditorUI::showGotoAnything() {
-    // Create a simple dialog for Goto Anything
-    HWND hDlg = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GOTO_ANYTHING), hEdit, GotoAnythingDialogProc);
-    ShowWindow(hDlg, SW_SHOW);
+void EditorUI::onAIResponseReceived(const QString& response) {
+    editor->appendPlainText("\nAI Response:\n" + response);
+    QScrollBar *verticalScrollBar = editor->verticalScrollBar();
+    verticalScrollBar->setValue(verticalScrollBar->maximum());
 }
 
-// Goto Anything dialog procedure
-INT_PTR CALLBACK GotoAnythingDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
-        case WM_INITDIALOG:
-            return TRUE;
+void EditorUI::onFormatCode() {
+    QString formattedCode = codeFormatter->formatCode(editor->toPlainText(), "cpp");
+    editor->setPlainText(formattedCode);
+}
 
-        case WM_COMMAND:
-            if (LOWORD(wParam) == IDOK) {
-                TCHAR szBuffer[256];
-                GetDlgItemText(hDlg, IDC_GOTO_EDIT, szBuffer, 256);
-                // Implement the logic to go to the entered location
-                EndDialog(hDlg, IDOK);
-                return TRUE;
-            }
-            if (LOWORD(wParam) == IDCANCEL) {
-                EndDialog(hDlg, IDCANCEL);
-                return TRUE;
-            }
-            break;
+void EditorUI::onTextChanged() {
+    if (completer->popup()->isVisible()) {
+        completer->popup()->hide();
     }
-    return FALSE;
+
+    debounceTimer->start(300); // Debounce timer for 300ms
+}
+
+void EditorUI::requestCompletion() {
+    QString prompt = editor->toPlainText();
+    QTextCursor tc = editor->textCursor();
+    int cursorPosition = tc.position();
+
+    aiAssistant->getSuggestions(prompt.toStdString(), cursorPosition, [this](const std::string& suggestions) {
+        QStringList suggestionList = QString::fromStdString(suggestions).split('\n', Qt::SkipEmptyParts);
+        showCompletionPopup(suggestionList);
+    });
+}
+
+void EditorUI::showCompletionPopup(const QStringList& suggestions) {
+    if (suggestions.isEmpty())
+        return;
+
+    completer->setModel(new QStringListModel(suggestions, completer));
+    completer->setCompletionPrefix(editor->textUnderCursor());
+
+    QRect cr = editor->cursorRect();
+    cr.setWidth(completer->popup()->sizeHintForColumn(0)
+                + completer->popup()->verticalScrollBar()->sizeHint().width());
+    completer->complete(cr);
+}
+
+void EditorUI::insertCompletion(const QString& completion) {
+    QTextCursor tc = editor->textCursor();
+    tc.insertText(completion);
+    editor->setTextCursor(tc);
 }
