@@ -79,3 +79,55 @@ document.getElementById('open-file').addEventListener('click', () => {
 
 // Set initial size
 editor.setSize('100%', '100%');
+
+// Autocomplete function
+function autocomplete() {
+  // Get the current cursor position and token
+  const cursor = editor.getCursor();
+  const token = editor.getTokenAt(cursor);
+
+  // Get the current line and column
+  const currentLine = editor.getCursor().line;
+  const currentCh = editor.getCursor().ch;
+
+  // Extract the code context
+  const codeContext = editor.getValue(); 
+
+  // Construct the API request URL with line and column information
+  const apiUrl = `http://localhost:3000/completions?line=${currentLine}&column=${currentCh}`; 
+
+  // Send the API request
+  fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      code: codeContext,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Extract suggestions from the API response
+      const suggestions = data.suggestions || []; 
+
+      // Show the suggestions in a completer
+      if (suggestions.length > 0) {
+        showCompleter(suggestions);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching completions:", error);
+      // Handle the error, e.g., show an error message to the user
+    });
+}
+
+// Function to show the completer (example implementation)
+function showCompleter(suggestions) {
+  const completer = new CodeMirror.hint.auto(editor, () => ({
+    list: suggestions,
+    from: editor.getCursor(),
+    to: editor.getCursor(),
+  }));
+  completer();
+}
