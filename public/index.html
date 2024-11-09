@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnSupear Editor</title>
+    <title>SnSupear Web Editor</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
@@ -11,15 +11,15 @@
 <body>
     <div class="container">
         <header>
-            <h1>SnSupear Editor</h1>
+            <h1>SnSupear Web Editor</h1>
             <div class="toolbar">
-                <button id="newFile">New</button>
-                <button id="openFile">Open</button>
-                <button id="saveFile">Save</button>
-                <select id="language">
+                <button id="newFile">New File</button>
+                <button id="openFile">Open File</button>
+                <button id="saveFile">Save File</button>
+                <select id="language-select">
                     <option value="javascript">JavaScript</option>
                     <option value="python">Python</option>
-                    <option value="xml">HTML/XML</option>
+                    <option value="htmlmixed">HTML/XML</option>
                     <option value="css">CSS</option>
                 </select>
             </div>
@@ -30,7 +30,6 @@
             </div>
             <div class="status-bar">
                 <span id="status">Ready</span>
-                <span id="cursor-position">Line: 1, Column: 1</span>
             </div>
         </main>
     </div>
