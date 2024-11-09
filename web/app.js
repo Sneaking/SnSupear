@@ -1,3 +1,5 @@
+// web/app.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
         mode: 'javascript',
@@ -14,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'Cmd-S': () => saveFile(),
             'Ctrl-P': () => printFile(),
             'Cmd-P': () => printFile(),
+            // AI assistant integration shortcuts
+            'Ctrl-I': () => getAISuggestions(),
+            'Cmd-I': () => getAISuggestions()
         }
     });
 
@@ -23,13 +28,60 @@ document.addEventListener('DOMContentLoaded', () => {
         editor.setOption('mode', mode);
     });
 
-    // Set initial size
+    // Set initial size of editor
     editor.setSize('100%', '100%');
 
     // Handle window resize
     window.addEventListener('resize', () => {
         editor.refresh();
     });
+
+    // AI Assistant Integration
+    async function getAISuggestions() {
+        const selectedText = editor.getSelection() || editor.getValue();
+        if (!selectedText) {
+            updateStatus('No code selected for AI suggestions');
+            return;
+        }
+
+        updateStatus('Fetching AI suggestions...');
+        try {
+            const response = await fetch('/api/ai/suggestions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: selectedText,
+                    language: editor.getOption('mode')
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            if (data.suggestion) {
+                if (editor.somethingSelected()) {
+                    editor.replaceSelection(data.suggestion);
+                } else {
+                    const cursor = editor.getCursor();
+                    editor.replaceRange(data.suggestion, cursor);
+                }
+                updateStatus('AI suggestion applied');
+            } else {
+                updateStatus('No suggestion received from AI');
+            }
+        } catch (error) {
+            console.error('AI suggestion error:', error);
+            updateStatus('Error getting AI suggestions');
+        }
+    }
+
+    // Add AI suggestion button to the toolbar
+    const aiButton = document.createElement('button');
+    aiButton.id = 'aiSuggest';
+    aiButton.textContent = 'AI Suggest';
+    aiButton.className = 'toolbar-button';
+    aiButton.onclick = getAISuggestions;
+    document.querySelector('.toolbar').appendChild(aiButton);
 
     // File Operations
     document.getElementById('newFile').addEventListener('click', () => {
@@ -49,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (e) => {
                 editor.setValue(e.target.result);
                 updateStatus(`Opened ${file.name}`);
-                // Set mode based on file extension
+                // Automatically set the language mode based on the file extension
                 const extension = file.name.split('.').pop();
                 const languageMap = {
                     'js': 'javascript',
@@ -76,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         a.download = `code.${getFileExtension()}`;
         a.click();
         URL.revokeObjectURL(url);
-        updateStatus('File saved');
+        updateStatus('File saved successfully');
     }
 
     function printFile() {
