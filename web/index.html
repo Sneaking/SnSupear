@@ -9,6 +9,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/addon/hint/show-hint.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/addon/scroll/simplescrollbars.css">
+    <style>
+        /* Add styles for the chat bar */
+        #chat-bar {
+            width: 100%;
+            height: 200px; /* Adjust height as needed */
+            background-color: #222;
+            border: 1px solid #00ff00;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        #chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #000;
+            color: #00ff00;
+            border: none;
+            resize: none;
+        }
+        #chat-send {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <div id="editor-container">
@@ -26,7 +54,13 @@
         <div id="editor-wrapper">
             <textarea id="editor"></textarea>
         </div>
+
+        <div id="chat-bar"> 
+            <textarea id="chat-input" placeholder="Type your message here..."></textarea>
+            <button id="chat-send">Send</button>
+        </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
@@ -37,5 +71,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/addon/scroll/simplescrollbars.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/addon/selection/active-line.min.js"></script>
     <script src="app.js"></script>
+    <script>
+        // ... (Your existing JavaScript code) ...
+
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatBar = document.getElementById('chat-bar'); // Get the chat bar element
+
+        chatSend.addEventListener('click', () => {
+            const message = chatInput.value;
+            chatInput.value = ''; // Clear the input field
+
+            // Display the user's message in the chat bar
+            displayMessage('user', message);
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the AI's response in the chat bar
+                displayMessage('ai', data.response);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Function to display messages in the chat bar
+        function displayMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add(sender); // Add a class for styling
+            messageElement.textContent = message;
+            chatBar.appendChild(messageElement); 
+        }
+    </script>
 </body>
 </html>
