@@ -2,12 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -21,19 +19,19 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
+app.use('/api', limiter);
 
-// Serve static files from the web directory
-app.use(express.static(path.join(__dirname, '../web')));
+// Serve static files
+app.use(express.static(join(__dirname, '../public')));
 
-// Basic route
+// API Routes
 app.get('/api/status', (req, res) => {
-  res.json({ message: 'Server is running' });
+  res.json({ status: 'online', timestamp: new Date().toISOString() });
 });
 
 // Serve index.html for all other routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../web/index.html'));
+  res.sendFile(join(__dirname, '../public/index.html'));
 });
 
 // Error handling middleware
@@ -43,6 +41,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${port}`>
-  console.log(`Access from other devices using your comput>
+  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Access from other devices using your computer's IP address`);
 });
