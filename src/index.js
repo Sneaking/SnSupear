@@ -4,7 +4,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { Configuration, OpenAIApi } from "openai";
+import { Configuration, OpenAIApi } from "openai"; // Correct import
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -51,7 +51,7 @@ app.post('/completions', async (req, res) => {
   try {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `Complete this code:\n${code}`, // Removed line and column from prompt
+      prompt: `Complete this code:\n${code}`,
       max_tokens: 50,
       temperature: 0.7,
       stop: ["###"],
