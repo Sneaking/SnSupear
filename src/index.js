@@ -51,7 +51,7 @@ app.post('/completions', async (req, res) => {
   try {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: `Complete the code at line ${line}, column ${column}:\n\n${code}`,
+      prompt: `Complete this code:\n${code}`, // Removed line and column from prompt
       max_tokens: 50,
       temperature: 0.7,
       stop: ["###"],
