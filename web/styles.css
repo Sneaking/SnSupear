@@ -17,7 +17,7 @@ h1 {
 }
 
 #toolbar {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     display: flex;
     gap: 10px;
 }
@@ -47,16 +47,16 @@ button:hover {
     background: #000 !important;
 }
 
-/* Marina Theme */
-.cm-s-marina.CodeMirror { background: #000000; color: #00ff00; }
-.cm-s-marina .CodeMirror-cursor { border-left: 1px solid #00ff00; }
-.cm-s-marina .CodeMirror-selected { background: rgba(0, 255, 0, 0.1); }
+/* SnMarinaSync Theme */
+.cm-s-marina.CodeMirror { background: #000000; color: #00dd00; }
+.cm-s-marina .CodeMirror-cursor { border-left: 1px solid #00dd00; }
+.cm-s-marina .CodeMirror-selected { background: rgba(0, 221, 0, 0.1); }
 .cm-s-marina .cm-keyword { color: #00ffff; }
 .cm-s-marina .cm-operator { color: #ff00ff; }
 .cm-s-marina .cm-string { color: #ffff00; }
 .cm-s-marina .cm-comment { color: #808080; }
 .cm-s-marina .cm-number { color: #ff8000; }
-.cm-s-marina .cm-def { color: #00ff00; }
-.cm-s-marina .cm-variable { color: #00ff00; }
+.cm-s-marina .cm-def { color: #00dd00; }
+.cm-s-marina .cm-variable { color: #00dd00; }
 .cm-s-marina .cm-variable-2 { color: #00ffaa; }
 .cm-s-marina .cm-property { color: #00ffff; }
