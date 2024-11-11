@@ -4,27 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnSupear Editor - Test03</title>
-    <!-- Include necessary styles -->
-    <link rel="stylesheet" href="style.css">
+    <title>SnSupear Web Editor</title>
+    <!-- Load local and external stylesheets -->
+    <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css"> <!-- Optional: Add a theme -->
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>SnSupear Editor - Test03</h1>
+            <h1>SnSupear Web Editor</h1>
             <div class="toolbar">
-                <button id="newFile">New</button>
-                <button id="openFile">Open</button>
-                <button id="saveFile">Save</button>
-                <select id="language">
+                <button id="newFile">New File</button>
+                <button id="openFile">Open File</button>
+                <button id="saveFile">Save File</button>
+                <select id="language-select">
                     <option value="javascript">JavaScript</option>
                     <option value="python">Python</option>
-                    <option value="xml">HTML/XML</option>
+                    <option value="htmlmixed">HTML/XML</option>
                     <option value="css">CSS</option>
                 </select>
-                <button id="gptChatToggle">Chat with GPT</button>
             </div>
         </header>
         <main>
@@ -35,20 +34,19 @@
                 <span id="status">Ready</span>
                 <span id="cursor-position">Line: 1, Column: 1</span>
             </div>
+            <div id="chat-container">
+                <div id="chat-output"></div>
+                <input type="text" id="chat-input" placeholder="Ask GPT...">
+                <button id="chat-submit">Send</button>
+            </div>
         </main>
-        <aside id="gpt-chat" class="hidden">
-            <h2>GPT Chat</h2>
-            <div id="chat-log"></div>
-            <input type="text" id="chat-input" placeholder="Type your message...">
-            <button id="send-message">Send</button>
-        </aside>
     </div>
-    <!-- Include CodeMirror and additional scripts -->
+    <!-- Load CodeMirror and initialize the editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js"></script> <!-- Load your app script -->
 </body>
 </html>
