@@ -1,22 +1,20 @@
-// public/app.js
+// /public/app.js
+
 import CodeMirror from 'codemirror';
+import 'codemirror/mode/javascript/javascript.js';
+import 'codemirror/mode/python/python.js';
+import 'codemirror/mode/xml/xml.js';
+import 'codemirror/mode/css/css.js';
 
-// Initialize CodeMirror editor
+/**
+ * @file /public/app.js
+ * Initializes the CodeMirror editor and handles file operations, language selection, and GPT chat features.
+ */
+
+// Initialize CodeMirror editor with SnSupear custom theme
 const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
-    lineNumbers: true,
     mode: 'javascript', // Default mode
-    theme: 'monokai',
-    tabSize: 2
-});
-
-// Language select event
-document.getElementById('language-select').addEventListener('change', (event) => {
-    const mode = event.target.value;
-    editor.setOption('mode', mode);
-});
-let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
-    mode: 'javascript',
-    theme: 'monokai',
+    theme: 'monokai', // Use theme
     lineNumbers: true,
     autoCloseBrackets: true,
     matchBrackets: true,
@@ -24,23 +22,22 @@ let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
     tabSize: 4,
     lineWrapping: true,
     extraKeys: {
-        'Ctrl-S': function(cm) {
-            saveFile();
-        },
-        'Cmd-S': function(cm) {
-            saveFile();
-        }
+        'Ctrl-S': function (cm) { saveFile(); },
+        'Cmd-S': function (cm) { saveFile(); }
     }
 });
 
-// Language selector
-const languageSelect = document.getElementById('language');
+// Language selection event
+const languageSelect = document.getElementById('language-select');
 languageSelect.addEventListener('change', (e) => {
-    editor.setOption('mode', e.target.value);
-    updateStatus(`Language changed to ${e.target.value}`);
+    const mode = e.target.value;
+    editor.setOption('mode', mode);
+    updateStatus(`Language mode changed to ${mode}`);
 });
 
-// File operations
+/**
+ * Handles creation of a new file, with a prompt to confirm.
+ */
 document.getElementById('newFile').addEventListener('click', () => {
     if (confirm('Create new file? Unsaved changes will be lost.')) {
         editor.setValue('');
@@ -48,6 +45,10 @@ document.getElementById('newFile').addEventListener('click', () => {
     }
 });
 
+/**
+ * Opens a file and loads its content into the editor.
+ * Automatically sets the language mode based on file extension.
+ */
 document.getElementById('openFile').addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -57,7 +58,6 @@ document.getElementById('openFile').addEventListener('click', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             editor.setValue(e.target.result);
-            // Set language based on file extension
             const extension = file.name.split('.').pop();
             const languageMap = {
                 'js': 'javascript',
@@ -76,9 +76,15 @@ document.getElementById('openFile').addEventListener('click', () => {
     input.click();
 });
 
+/**
+ * Saves the content of the editor to a file.
+ */
 document.getElementById('saveFile').addEventListener('click', saveFile);
 
-// Helper functions
+/**
+ * @function saveFile
+ * Saves the current editor content to a file, using the appropriate file extension.
+ */
 function saveFile() {
     const content = editor.getValue();
     const blob = new Blob([content], { type: 'text/plain' });
@@ -91,6 +97,11 @@ function saveFile() {
     updateStatus('File saved');
 }
 
+/**
+ * @function getFileExtension
+ * Determines the appropriate file extension based on the current mode.
+ * @returns {string} - The file extension
+ */
 function getFileExtension() {
     const mode = editor.getOption('mode');
     const extensionMap = {
@@ -102,20 +113,25 @@ function getFileExtension() {
     return extensionMap[mode] || 'txt';
 }
 
+/**
+ * @function updateStatus
+ * Updates the status message in the status bar.
+ * @param {string} message - The message to display
+ */
 function updateStatus(message) {
-    document.getElementById('status').textContent = message;
+    const statusElement = document.getElementById('status');
+    statusElement.textContent = message;
     setTimeout(() => {
-        document.getElementById('status').textContent = 'Ready';
+        statusElement.textContent = 'Ready';
     }, 3000);
 }
 
-// Update cursor position
+// Update cursor position in the status bar
 editor.on('cursorActivity', () => {
     const pos = editor.getCursor();
-    document.getElementById('cursor-position').textContent = 
+    document.getElementById('status').textContent = 
         `Line: ${pos.line + 1}, Column: ${pos.ch + 1}`;
 });
 
-// Set initial content
-editor.setValue(`// Welcome to SnSupear Editor
-// Start coding here...`);
+// Set initial content with a welcome message
+editor.setValue(`// Welcome to SnSupear Web Editor\n// Start coding here...`);
