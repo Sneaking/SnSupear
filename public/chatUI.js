@@ -1,3 +1,4 @@
+//public/chatUI.js
 document.getElementById('chat-submit').addEventListener('click', async () => {
     const message = document.getElementById('chat-input').value;
     if (!message) return;
