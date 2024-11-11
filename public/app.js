@@ -1,4 +1,19 @@
+// public/app.js
+import CodeMirror from 'codemirror';
+
 // Initialize CodeMirror editor
+const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    lineNumbers: true,
+    mode: 'javascript', // Default mode
+    theme: 'monokai',
+    tabSize: 2
+});
+
+// Language select event
+document.getElementById('language-select').addEventListener('change', (event) => {
+    const mode = event.target.value;
+    editor.setOption('mode', mode);
+});
 let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
     mode: 'javascript',
     theme: 'monokai',
