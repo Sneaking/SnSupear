@@ -1,38 +1,69 @@
-/* General Theme Settings */
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-family: 'Fira Code', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 0;
+    background: #1e1e1e;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    padding: 1rem;
 }
 
 header {
-    background-color: var(--header-background-color);
-    color: var(--header-text-color);
-    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    color: #00ff00;
+    margin: 0 0 1rem 0;
+}
+
+.toolbar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.toolbar button, .toolbar select {
-    background-color: var(--button-background-color);
-    color: var(--button-text-color);
-    border: none;
-    margin-left: 0.5rem;
+button, select {
+    background: #333;
+    color: #00ff00;
+    border: 1px solid #00ff00;
     padding: 0.5rem 1rem;
-    cursor: pointer;
     border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-/* Status Bar */
+button:hover {
+    background: #444;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#editor-container {
+    flex: 1;
+    border: 1px solid #00ff00;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.CodeMirror {
+    height: 100% !important;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+}
+
 .status-bar {
     display: flex;
     justify-content: space-between;
@@ -44,7 +75,7 @@ header {
     border-radius: 4px;
 }
 
-/* CodeMirror Custom Theme */
+/* Custom theme overrides */
 .cm-s-monokai.CodeMirror {
     background: #1a1a1a !important;
 }
@@ -56,80 +87,4 @@ header {
 
 .cm-s-monokai .CodeMirror-linenumber {
     color: #00ff00 !important;
-}
-
-/* Main Layout */
-main {
-    flex: 1;
-    display: flex;
-}
-
-#editor-container, #chat-container {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-}
-
-/* Chat Container */
-#chat-container {
-    width: 100%;
-    height: 300px;
-    border-top: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Chat Output */
-#chat-output {
-    flex: 1;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    max-height: 250px;
-    background-color: #f9f9f9;
-}
-
-/* Chat Input and Submit Button */
-#chat-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 5px;
-}
-
-#chat-submit {
-    padding: 8px 12px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    align-self: flex-end;
-}
-
-#chat-submit:hover {
-    background-color: #0056b3;
-}
-
-/* Chat Messages */
-.user-message {
-    background-color: var(--user-message-bg);
-    color: var(--user-message-color);
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    align-self: flex-end;
-}
-
-.ai-message, .error-message {
-    background-color: var(--ai-message-bg);
-    color: var(--ai-message-color);
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    align-self: flex-start;
 }
