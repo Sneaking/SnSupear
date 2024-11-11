@@ -88,3 +88,68 @@ main {
 .cm-s-monokai .CodeMirror-linenumber {
     color: #00ff00 !important;
 }
+
+/* /public/styles.css - SnSupear Theme Integration */
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Fira Code', monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background-color: var(--header-background-color);
+    color: var(--header-text-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toolbar button, .toolbar select {
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    border: none;
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+main {
+    flex: 1;
+    display: flex;
+}
+
+#editor-container, #chat-container {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+/* Chat messages */
+.user-message {
+    background-color: var(--user-message-bg);
+    color: var(--user-message-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    align-self: flex-end;
+}
+
+.ai-message, .error-message {
+    background-color: var(--ai-message-bg);
+    color: var(--ai-message-color);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    align-self: flex-start;
+}
