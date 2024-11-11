@@ -153,3 +153,49 @@ main {
     margin-bottom: 0.5rem;
     align-self: flex-start;
 }
+/* Enlarge the chat container */
+#chat-container {
+    width: 100%; /* or specify a fixed width like '400px' */
+    height: 300px; /* Increase height to give more room */
+    border-top: 1px solid #ccc; /* Optional: Add a border to separate from editor */
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the chat output area larger */
+#chat-output {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    max-height: 250px; /* Adjust this to control the height */
+    background-color: #f9f9f9; /* Optional: Background color for better readability */
+}
+
+/* Style the chat input */
+#chat-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+/* Style the chat submit button */
+#chat-submit {
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end; /* Align the button to the right */
+}
+
+/* Optional: Change button hover effect */
+#chat-submit:hover {
+    background-color: #0056b3;
+}
