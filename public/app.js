@@ -1,20 +1,8 @@
 // /public/app.js
-
-import CodeMirror from 'codemirror';
-import 'codemirror/mode/javascript/javascript.js';
-import 'codemirror/mode/python/python.js';
-import 'codemirror/mode/xml/xml.js';
-import 'codemirror/mode/css/css.js';
-
-/**
- * @file /public/app.js
- * Initializes the CodeMirror editor and handles file operations, language selection, and GPT chat features.
- */
-
-// Initialize CodeMirror editor with SnSupear custom theme
-const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
-    mode: 'javascript', // Default mode
-    theme: 'monokai', // Use theme
+// Initialize CodeMirror editor with enhanced error handling
+let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    mode: 'javascript',
+    theme: 'monokai',
     lineNumbers: true,
     autoCloseBrackets: true,
     matchBrackets: true,
@@ -22,22 +10,80 @@ const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
     tabSize: 4,
     lineWrapping: true,
     extraKeys: {
-        'Ctrl-S': function (cm) { saveFile(); },
-        'Cmd-S': function (cm) { saveFile(); }
+        'Ctrl-S': function(cm) {
+            saveFile();
+        },
+        'Cmd-S': function(cm) {
+            saveFile();
+        },
+        'Ctrl-Space': function(cm) {
+            toggleGPTChat();
+        }
     }
 });
 
-// Language selection event
-const languageSelect = document.getElementById('language-select');
+// Language selector with error handling
+const languageSelect = document.getElementById('language');
 languageSelect.addEventListener('change', (e) => {
-    const mode = e.target.value;
-    editor.setOption('mode', mode);
-    updateStatus(`Language mode changed to ${mode}`);
+    editor.setOption('mode', e.target.value);
+    updateStatus(`Language changed to ${e.target.value}`);
 });
 
-/**
- * Handles creation of a new file, with a prompt to confirm.
- */
+// GPT Chat Integration
+const gptChat = document.getElementById('gpt-chat');
+const chatLog = document.getElementById('chat-log');
+const chatInput = document.getElementById('chat-input');
+const sendMessageButton = document.getElementById('send-message');
+
+// Toggle GPT Chat
+document.getElementById('gptChatToggle').addEventListener('click', toggleGPTChat);
+
+function toggleGPTChat() {
+    gptChat.classList.toggle('hidden');
+}
+
+// Send message to GPT
+sendMessageButton.addEventListener('click', () => {
+    const message = chatInput.value.trim();
+    if (message) {
+        addChatMessage('You', message);
+        chatInput.value = '';
+        // Call the GPT API
+        callGPTAPI(message);
+    }
+});
+
+function addChatMessage(sender, message) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('chat-message');
+    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    chatLog.appendChild(messageElement);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// Call GPT API
+async function callGPTAPI(message) {
+    try {
+        const response = await fetch('/gpt-api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: message })
+        });
+        const data = await response.json();
+        if (data && data.reply) {
+            addChatMessage('GPT', data.reply);
+        } else {
+            addChatMessage('Error', 'No reply from GPT.');
+        }
+    } catch (error) {
+        console.error('Error calling GPT API:', error);
+        addChatMessage('Error', 'Failed to communicate with GPT.');
+    }
+}
+
+// File operations
 document.getElementById('newFile').addEventListener('click', () => {
     if (confirm('Create new file? Unsaved changes will be lost.')) {
         editor.setValue('');
@@ -45,10 +91,6 @@ document.getElementById('newFile').addEventListener('click', () => {
     }
 });
 
-/**
- * Opens a file and loads its content into the editor.
- * Automatically sets the language mode based on file extension.
- */
 document.getElementById('openFile').addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -58,6 +100,7 @@ document.getElementById('openFile').addEventListener('click', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             editor.setValue(e.target.result);
+            // Set language based on file extension
             const extension = file.name.split('.').pop();
             const languageMap = {
                 'js': 'javascript',
@@ -76,15 +119,8 @@ document.getElementById('openFile').addEventListener('click', () => {
     input.click();
 });
 
-/**
- * Saves the content of the editor to a file.
- */
 document.getElementById('saveFile').addEventListener('click', saveFile);
 
-/**
- * @function saveFile
- * Saves the current editor content to a file, using the appropriate file extension.
- */
 function saveFile() {
     const content = editor.getValue();
     const blob = new Blob([content], { type: 'text/plain' });
@@ -97,11 +133,6 @@ function saveFile() {
     updateStatus('File saved');
 }
 
-/**
- * @function getFileExtension
- * Determines the appropriate file extension based on the current mode.
- * @returns {string} - The file extension
- */
 function getFileExtension() {
     const mode = editor.getOption('mode');
     const extensionMap = {
@@ -113,25 +144,18 @@ function getFileExtension() {
     return extensionMap[mode] || 'txt';
 }
 
-/**
- * @function updateStatus
- * Updates the status message in the status bar.
- * @param {string} message - The message to display
- */
 function updateStatus(message) {
-    const statusElement = document.getElementById('status');
-    statusElement.textContent = message;
+    document.getElementById('status').textContent = message;
     setTimeout(() => {
-        statusElement.textContent = 'Ready';
+        document.getElementById('status').textContent = 'Ready';
     }, 3000);
 }
 
-// Update cursor position in the status bar
 editor.on('cursorActivity', () => {
     const pos = editor.getCursor();
-    document.getElementById('status').textContent = 
+    document.getElementById('cursor-position').textContent = 
         `Line: ${pos.line + 1}, Column: ${pos.ch + 1}`;
 });
 
-// Set initial content with a welcome message
-editor.setValue(`// Welcome to SnSupear Web Editor\n// Start coding here...`);
+editor.setValue(`// Welcome to SnSupear Editor - Test03
+// Start coding here...`);
